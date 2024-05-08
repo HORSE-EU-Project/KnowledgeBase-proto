@@ -14,12 +14,6 @@ class Playbook(BaseModel):
     mitigation : str
     url : networks.Url
 
-class Threat(TypedDict):
-    type: str
-    service: str
-    port: List[int]
-
-
 class Timeframe(TypedDict):
     start: datetime
     end: datetime
@@ -28,17 +22,15 @@ class Mitigation(BaseModel):
     mitigation_name : str
 
 class Attack(BaseModel):
-    subnet_address: str  # ip address?
-    threat: Threat
-    time_frame: Timeframe
-    mitigation : Optional[List[int]] = None
+    attack_name : str
+    mitigation_name : Optional[str] = None
 
 class AttackList(BaseModel):
     attack_list : List[str]
 
 def get_all_attacks() -> List[str]:
     # create connection with database
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
     conn = engine.connect()
 
     try:
@@ -82,7 +74,7 @@ def get_mitigation(attack: str) -> List[str]:
         fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
     """
     # create connection with database
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
     conn = engine.connect()
 
     try:
@@ -124,7 +116,7 @@ def get_playbook(mitigation: str) -> str:
         fastapi.HTTPException: If there is no playbook endpoint associated with the specified mitigation measure.
     """
     # create connection with database
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') 
     conn = engine.connect()
 
     try:
@@ -168,7 +160,7 @@ def fetch_mitigation(attack: Attack) -> Attack:
         sqlalchemy.exc.OperationalError: If there is an operational error while connecting to the database.
         fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
     """
-    attack.mitigation = get_mitigation(attack.threat["type"])
+    attack.mitigation_name = get_mitigation(attack.attack_name)
     response = attack
     return response
 
@@ -208,7 +200,7 @@ def get_all_attacks() -> AttackList:
         OperationalError: If there is an operational error while connecting to the database.
     """
     # create connection with database
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
     conn = engine.connect()
 
     try:
