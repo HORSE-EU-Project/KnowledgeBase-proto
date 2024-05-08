@@ -1,5 +1,17 @@
 services:
-# database definition service will be here
+  attacks-mitigations-database:
+    image: postgres
+    restart: unless-stopped
+    container_name: attacks-mitigations-database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=md5579e4
+      - POSTGRES_DB=knowledge-base
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db:/var/lib/postgresql/data
+      - ./knowledge-base.sql:/docker-entrypoint-initdb.d/init.sql
   web-server:
     build: .
     ports:

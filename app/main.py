@@ -1,15 +1,14 @@
-from typing import Union, Optional, List
+from typing import Optional, List
 from typing_extensions import TypedDict
 
 from fastapi import FastAPI, HTTPException
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, networks
 from datetime import datetime
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
-import json
+
+import logging
 
 class Playbook(BaseModel):
     mitigation : str
@@ -34,6 +33,40 @@ class Attack(BaseModel):
     time_frame: Timeframe
     mitigation : Optional[List[int]] = None
 
+class AttackList(BaseModel):
+    attack_list : List[str]
+
+def get_all_attacks() -> List[str]:
+    # create connection with database
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    conn = engine.connect()
+
+    try:
+        query = text(f"SELECT name FROM attack;")
+        attacks_list = conn.execute(query)
+        attacks_list = attacks_list.fetchall()
+        if not attacks_list:
+            raise HTTPException(status_code=404, detail=f"There exists no attacks in the database")
+
+        # commit the transaction
+        conn.commit()
+
+        # extract the results
+        results = [attacks[0] for attacks in attacks_list]
+        logger = logging.getLogger("mycoolapp")
+        logger.error("1-------->")
+        logger.error(results)
+        return results
+    
+    except OperationalError as e:
+        # If there's an operational error, raise it
+        raise e
+
+    finally:
+        # Close the connection
+        conn.close()
+
+
 def get_mitigation(attack: str) -> List[str]:
     """
     Retrieves mitigation measures associated with a specific attack from the database.
@@ -48,10 +81,32 @@ def get_mitigation(attack: str) -> List[str]:
         sqlalchemy.exc.OperationalError: If there is an operational error while connecting to the database.
         fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
     """
-    
-    results = ['filter_network_traffic', 'mitigation_2']
+    # create connection with database
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    conn = engine.connect()
 
-    return results
+    try:
+        # execute query
+        query = text(f"SELECT mitigation FROM attack WHERE name = '{attack}';")   # check security issues
+        mitigations = conn.execute(query)
+        mitigations = mitigations.fetchall()
+        if not mitigations:
+            raise HTTPException(status_code=404, detail=f"There exists no mitigation associated to attack '{attack}'")
+
+        # commit the transaction
+        conn.commit()
+
+        # extract results
+        results = [mitigation[0] for mitigation in mitigations]
+        return results
+
+    except OperationalError as e:
+        # If there's an operational error, raise it
+        raise e
+
+    finally:
+        # Close the connection
+        conn.close()
 
 
 def get_playbook(mitigation: str) -> str:
@@ -68,13 +123,38 @@ def get_playbook(mitigation: str) -> str:
         sqlalchemy.exc.OperationalError: If there is an operational error while connecting to the database.
         fastapi.HTTPException: If there is no playbook endpoint associated with the specified mitigation measure.
     """
-    playbook_endpoint = "https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html"
-    return playbook_endpoint
+    # create connection with database
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    conn = engine.connect()
+
+    try:
+        # execute query
+        query = text(f"SELECT playbook_endpoint FROM mitigation WHERE name = '{mitigation}';")
+        playbook = conn.execute(query).fetchall()
+
+        # commit the transaction
+        conn.commit()
+
+        # check if there are no results
+        if not playbook:
+            raise HTTPException(status_code=404, detail=f"There exists no playbook endpoint associated to mitigation '{mitigation}'")
+
+        # extract playbook endpoint
+        playbook_endpoint = playbook[0][0]
+        return playbook_endpoint
+
+    except OperationalError as e:
+        # If there's an operational error, raise it
+        raise e
+
+    finally:
+        # Close the connection
+        conn.close()
 
 app = FastAPI()
 
 @app.post("/mitigations")
-async def fetch_mitigation(attack: Attack) -> Attack:
+def fetch_mitigation(attack: Attack) -> Attack:
     """
     Fetches mitigation measures for a given attack.
 
@@ -93,7 +173,7 @@ async def fetch_mitigation(attack: Attack) -> Attack:
     return response
 
 @app.post("/playbooks")
-async def fetch_playbook(mitigation: Mitigation) -> Playbook:
+def fetch_playbook(mitigation: Mitigation) -> Playbook:
     """
     Fetches the playbook URL associated with a mitigation measure.
 
@@ -114,3 +194,43 @@ async def fetch_playbook(mitigation: Mitigation) -> Playbook:
     except HTTPException as e:
         # If there's an HTTPException, re-raise it
         raise e
+
+@app.get("/allattacks")
+def get_all_attacks() -> AttackList:
+    """
+    Retrieves a list of all attacks from the database.
+
+    Returns:
+        AttackList: An object containing a list of all attacks retrieved from the database.
+    
+    Raises:
+        HTTPException: If there are no attacks in the database.
+        OperationalError: If there is an operational error while connecting to the database.
+    """
+    # create connection with database
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') # TODO remove password
+    conn = engine.connect()
+
+    try:
+        query = text(f"SELECT DISTINCT name FROM attack;")
+        attacks_list = conn.execute(query)
+        attacks_list = attacks_list.fetchall()
+        if not attacks_list:
+            raise HTTPException(status_code=404, detail=f"There exists no attacks in the database")
+
+        # commit the transaction
+        conn.commit()
+
+        # extract the results
+        attack_list = [attacks[0] for attacks in attacks_list]
+        response = AttackList(attack_list=attack_list)  
+        return response
+    
+    except OperationalError as e:
+        # If there's an operational error, raise it
+        raise e
+
+    finally:
+        # Close the connection
+        conn.close()
+      
