@@ -21,9 +21,15 @@ class Timeframe(TypedDict):
 class Mitigation(BaseModel):
     mitigation_name : str
 
+
+class MitigationPriority(BaseModel):
+    name : str
+    priority : int
+    description : str
+
 class Attack(BaseModel):
     attack_name : str
-    mitigation_name : Optional[str] = None
+    mitigations : Optional[List[MitigationPriority]] = None
 
 class AttackList(BaseModel):
     attack_list : List[str]
@@ -67,19 +73,24 @@ def get_mitigation(attack: str) -> List[str]:
         attack (str): The name of the attack for which to retrieve mitigation measures.
 
     Returns:
-        List[str]: A list of mitigation measures associated with the specified attack.
+        List[MitigationPriority]: A list of mitigation measures with their priorities and description associated with the specified attack.
 
     Raises:
         sqlalchemy.exc.OperationalError: If there is an operational error while connecting to the database.
         fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
     """
     # create connection with database
+    # docker
     engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
-    conn = engine.connect()
 
+    # uvicorn
+    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@localhost:5432/knowledge-base')
+
+    conn = engine.connect()
+    
     try:
         # execute query
-        query = text(f"SELECT mitigation FROM attack WHERE name = '{attack}';")   # check security issues
+        query = text(f"SELECT mitigation, mitigation_priority, description FROM attacks_mitigations WHERE attack = '{attack}' ORDER BY mitigation_priority;")   # check security issues
         mitigations = conn.execute(query)
         mitigations = mitigations.fetchall()
         if not mitigations:
@@ -89,7 +100,13 @@ def get_mitigation(attack: str) -> List[str]:
         conn.commit()
 
         # extract results
-        results = [mitigation[0] for mitigation in mitigations]
+        mitigations_list = []
+        
+        for mitigation in mitigations:
+            mitigation_priority = MitigationPriority(name=mitigation[0], priority=mitigation[1], description=mitigation[2])
+            mitigations_list.append(mitigation_priority)
+        
+        results = mitigations_list
         return results
 
     except OperationalError as e:
@@ -116,7 +133,12 @@ def get_playbook(mitigation: str) -> str:
         fastapi.HTTPException: If there is no playbook endpoint associated with the specified mitigation measure.
     """
     # create connection with database
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base') 
+    # docker
+    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
+
+    # uvicorn
+    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@localhost:5432/knowledge-base')
+
     conn = engine.connect()
 
     try:
@@ -160,7 +182,7 @@ def fetch_mitigation(attack: Attack) -> Attack:
         sqlalchemy.exc.OperationalError: If there is an operational error while connecting to the database.
         fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
     """
-    attack.mitigation_name = get_mitigation(attack.attack_name)
+    attack.mitigations = get_mitigation(attack.attack_name)
     response = attack
     return response
 
@@ -199,8 +221,15 @@ def get_all_attacks() -> AttackList:
         HTTPException: If there are no attacks in the database.
         OperationalError: If there is an operational error while connecting to the database.
     """
+    
     # create connection with database
+
+    # docekr
     engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
+
+    # uvicorn
+    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@localhost:5432/knowledge-base') 
+    
     conn = engine.connect()
 
     try:
@@ -225,4 +254,11 @@ def get_all_attacks() -> AttackList:
     finally:
         # Close the connection
         conn.close()
+
+@app.get("/helloworld")
+def hello_world():
+    # example log
+    logger = logging.getLogger("mycoolapp")
+    logger.error("1-------->")
+    return "hello world"
       
