@@ -3,7 +3,7 @@ name: First Test
 on:
   push:
     branches:
-      - python
+      - main
 
 jobs:
   build:
