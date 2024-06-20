@@ -1,4 +1,4 @@
-name: Python CI/CD Guideline
+name: Python CI/CD Test
 
 on:
   push:
