@@ -48,4 +48,4 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Deploy
-      - run: echo "Deploying application..."
+        run: echo "Deploying application..."
