@@ -35,8 +35,8 @@ class AttackList(BaseModel):
     attack_list : List[str]
 
 DB_SECRET = 'md5579e4'
-DB_HOSTNAME = 'localhost'
-#DB_HOSTNAME = 'attacks-mitigations-database'
+#DB_HOSTNAME = 'localhost'
+DB_HOSTNAME = 'attacks-mitigations-database'
 DB_PORT = '5432'
 DB_NAME = 'knowledge-base'
 
