@@ -34,9 +34,15 @@ class Attack(BaseModel):
 class AttackList(BaseModel):
     attack_list : List[str]
 
+DB_SECRET = 'md5579e4'
+DB_HOSTNAME = 'localhost'
+#DB_HOSTNAME = 'attacks-mitigations-database'
+DB_PORT = '5432'
+DB_NAME = 'knowledge-base'
+
 def get_all_attacks() -> List[str]:
     # create connection with database
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
+    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
     conn = engine.connect()
 
     try:
@@ -81,10 +87,10 @@ def get_mitigation(attack: str) -> List[str]:
     """
     # create connection with database
     # docker
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
+    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
 
     # uvicorn
-    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@localhost:5432/knowledge-base')
+    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
 
     conn = engine.connect()
     
@@ -134,10 +140,10 @@ def get_playbook(mitigation: str) -> str:
     """
     # create connection with database
     # docker
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
+    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
 
     # uvicorn
-    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@localhost:5432/knowledge-base')
+    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
 
     conn = engine.connect()
 
@@ -225,10 +231,10 @@ def get_all_attacks() -> AttackList:
     # create connection with database
 
     # docekr
-    engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
+    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
 
     # uvicorn
-    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@localhost:5432/knowledge-base') 
+    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
     
     conn = engine.connect()
 
