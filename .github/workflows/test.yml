@@ -35,7 +35,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python version ${{ needs.setup.outputs.pythonversion }}
+          python-version: '3.9'
       
       - name: Install dependencies and run tests
         run: |
