@@ -37,7 +37,7 @@ jobs:
       
       - name: Run Docker containers
         env:
-        DB_SECRET: ${{secrets.DB_SECRET}}
+          DB_SECRET: ${{secrets.DB_SECRET}}
         run: |
           cd src
           docker-compose up -d
