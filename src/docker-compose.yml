@@ -2,13 +2,13 @@ services:
   attacks-mitigations-database:
     image: postgres
     restart: unless-stopped
-    container_name: attacks-mitigations-database
+    container_name: 'attacks-mitigations-database'
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=md5579e4
-      - POSTGRES_DB=knowledge-base
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_SECRET}
+      - POSTGRES_DB=${DB_NAME}
     ports:
-      - '5432:5432'
+      - '${DB_PORT}:${DB_PORT}'
     volumes:
       - ./db:/var/lib/postgresql/data
       - ./knowledge-base.sql:/docker-entrypoint-initdb.d/init.sql

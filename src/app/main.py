@@ -9,6 +9,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 
 import logging
+import os
+from dotenv import load_dotenv
 
 class Playbook(BaseModel):
     mitigation : str
@@ -34,15 +36,18 @@ class Attack(BaseModel):
 class AttackList(BaseModel):
     attack_list : List[str]
 
-DB_SECRET = 'md5579e4'
-DB_HOSTNAME = 'localhost'
-#DB_HOSTNAME = 'attacks-mitigations-database'
-DB_PORT = '5432'
-DB_NAME = 'knowledge-base'
+# load env variables
+load_dotenv()
+
+DB_SECRET = os.getenv('DB_SECRET')
+DB_HOSTNAME = os.getenv('DB_HOSTNAME')
+DB_PORT = os.getenv('DB_PORT')
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
 
 def get_all_attacks() -> List[str]:
     # create connection with database
-    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
+    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
     conn = engine.connect()
 
     try:
@@ -86,11 +91,7 @@ def get_mitigation(attack: str) -> List[str]:
         fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
     """
     # create connection with database
-    # docker
-    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
-
-    # uvicorn
-    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
+    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
 
     conn = engine.connect()
     
@@ -139,11 +140,7 @@ def get_playbook(mitigation: str) -> str:
         fastapi.HTTPException: If there is no playbook endpoint associated with the specified mitigation measure.
     """
     # create connection with database
-    # docker
-    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
-
-    # uvicorn
-    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
+    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
 
     conn = engine.connect()
 
@@ -229,12 +226,7 @@ def get_all_attacks() -> AttackList:
     """
     
     # create connection with database
-
-    # docekr
-    #engine = create_engine('postgresql+psycopg2://postgres:md5579e4@attacks-mitigations-database:5432/knowledge-base')
-
-    # uvicorn
-    engine = create_engine(f'postgresql+psycopg2://postgres:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
+    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
     
     conn = engine.connect()
 
