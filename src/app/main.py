@@ -41,7 +41,8 @@ load_dotenv()
 
 DB_SECRET = os.getenv('DB_SECRET')
 DB_HOSTNAME = os.getenv('DB_HOSTNAME')
-DB_PORT = os.getenv('DB_PORT')
+#DB_PORT = os.getenv('DB_PORT')
+DB_PORT = 5432
 DB_NAME = os.getenv('DB_NAME')
 DB_USER = os.getenv('DB_USER')
 
