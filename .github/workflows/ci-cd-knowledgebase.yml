@@ -7,6 +7,7 @@ on:
 
 jobs:
   build:
+    if: false
     runs-on: ubuntu-latest
     environment: local
     steps:
@@ -24,8 +25,9 @@ jobs:
           docker-compose up -d
 
   test:
-    needs: build
+    #needs: build
     runs-on: ubuntu-latest
+    environment: local
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -34,6 +36,8 @@ jobs:
           python-version: '3.9'
       
       - name: Run Docker containers
+        env:
+        DB_SECRET: ${{secrets.DB_SECRET}}
         run: |
           cd src
           docker-compose up -d
