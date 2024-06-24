@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 
 
-#sys.path.insert(0, dirname(abspath(__file__)))
+sys.path.insert(0, dirname(abspath(__file__)))
 
 from src.app.main import hello_world, get_all_attacks, get_mitigation
 

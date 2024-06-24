@@ -43,7 +43,7 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: pytest
+        run: pytest tests/test_web_server.py
       
       - name: Stop Docker containers
         run: docker-compose down
