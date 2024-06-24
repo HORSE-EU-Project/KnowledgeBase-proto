@@ -34,7 +34,7 @@ jobs:
       - name: Run Docker containers
         run: |
           cd src
-          docker-compose up
+          docker-compose up -d
 
       - name: Install dependencies and run tests
         run: |
