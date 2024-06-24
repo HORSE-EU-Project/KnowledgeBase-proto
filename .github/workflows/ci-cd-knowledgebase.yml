@@ -17,8 +17,8 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Test Docker containers
-        with:
-        DB_SECRET: ${{secrets.DB_SECRET}}
+        env:
+          DB_SECRET: ${{secrets.DB_SECRET}}
         run: |
           cd src
           docker-compose up
