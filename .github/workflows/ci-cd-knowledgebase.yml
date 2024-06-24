@@ -22,7 +22,9 @@ jobs:
         uses: docker/setup-buildx-action@v1
     
       - name: Build Docker images
-        run: docker-compose build
+        run: |
+          cd src
+          docker-compose build
         
       - name: Test Docker containers
         run: docker-compose up -d
