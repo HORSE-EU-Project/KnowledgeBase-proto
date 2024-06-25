@@ -28,6 +28,8 @@ jobs:
     #needs: build
     runs-on: ubuntu-latest
     environment: local
+    env:
+      DB_SECRET: ${{secrets.DB_SECRET}}
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -36,10 +38,9 @@ jobs:
           python-version: '3.9'
       
       - name: Run Docker containers
-        env:
-          DB_SECRET: ${{secrets.DB_SECRET}}
         run: |
           cd src
+          echo "this is a secret: $DB_SECRET. This is a host: $DB_HOSTNAME"
           docker-compose up -d
 
       - name: Install dependencies
