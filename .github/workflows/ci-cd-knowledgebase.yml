@@ -30,6 +30,10 @@ jobs:
     environment: local
     env:
       DB_SECRET: ${{secrets.DB_SECRET}}
+      DB_HOSTNAME: ${{vars.DB_HOSTNAME}}
+      DB_PORT: ${{vars.DB_PORT}}
+      DB_NAME: ${{vars.DB_NAME}}
+      DB_USER: ${{vars.DB_USER}}
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -40,7 +44,6 @@ jobs:
       - name: Run Docker containers
         run: |
           cd src
-          echo "this is a secret: $DB_SECRET. This is a host: ${{vars.DB_HOSTNAME}}"
           docker-compose up -d
 
       - name: Install dependencies
