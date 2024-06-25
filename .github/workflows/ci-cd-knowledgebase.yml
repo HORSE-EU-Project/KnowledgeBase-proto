@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    if: false
     runs-on: ubuntu-latest
     environment: local
     steps:
@@ -25,7 +24,7 @@ jobs:
           docker-compose up -d
 
   test:
-    #needs: build
+    needs: build
     runs-on: ubuntu-latest
     environment: local
     env:
