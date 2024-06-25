@@ -40,7 +40,7 @@ jobs:
       - name: Run Docker containers
         run: |
           cd src
-          echo "this is a secret: $DB_SECRET. This is a host: $DB_HOSTNAME"
+          echo "this is a secret: $DB_SECRET. This is a host: ${{vars.DB_HOSTNAME}}"
           docker-compose up -d
 
       - name: Install dependencies
