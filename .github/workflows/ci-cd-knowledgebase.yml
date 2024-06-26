@@ -51,8 +51,11 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
-      - name: Run tests
+      - name: Run tests web server
         run: pytest tests/test_web_server.py
+
+      - name: Run tests api
+        run: pytest tests/test_api.py
       
       - name: Stop Docker containers
         run: |
