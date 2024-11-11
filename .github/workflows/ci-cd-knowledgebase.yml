@@ -24,6 +24,10 @@ jobs:
       - name: Test Docker containers
         env:
           DB_SECRET: ${{secrets.DB_SECRET}}
+          DB_HOSTNAME: ${{vars.DB_HOSTNAME}}
+          DB_PORT: ${{vars.DB_PORT}}
+          DB_NAME: ${{vars.DB_NAME}}
+          DB_USER: ${{vars.DB_USER}}
         run: |
           cd src
           docker-compose up -d
