@@ -1,4 +1,5 @@
 name: knowledge-base-proto
+version : "2.23.3"
 services:
   attacks-mitigations-database:
     image: postgres
