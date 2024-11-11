@@ -1,0 +1,15 @@
+Examples of `curl` Commands to Interact with the Knowledge Base Service
+
+1. Retrieve a List of All Attacks
+
+```
+curl -X GET http://localhost/allattacks
+```
+
+2. Retrieve Mitigations for a Specific Attack
+
+```
+curl -X POST http://localhost/mitigations \
+     -H "Content-Type: application/json" \
+     -d "{\"attack_name\": \"ntp_dos\"}"
+```

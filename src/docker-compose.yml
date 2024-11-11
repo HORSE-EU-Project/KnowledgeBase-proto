@@ -1,3 +1,4 @@
+name: knowledge-base-proto
 services:
   attacks-mitigations-database:
     image: postgres
@@ -14,5 +15,6 @@ services:
       - ./knowledge-base.sql:/docker-entrypoint-initdb.d/init.sql
   web-server:
     build: .
+    container_name: 'web-server'
     ports:
       - "80:80"

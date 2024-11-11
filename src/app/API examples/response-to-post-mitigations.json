@@ -1,0 +1,40 @@
+{
+    "attack_name": "ntp_dos",
+    "mitigations": [
+        {
+            "name": "ntp_service_switch_off",
+            "priority": 1,
+            "description": "Temporarily shutting down the NTP service is the fastest way to halt the attack's impact and prevent further disruption while other measures are implemented. This minimizes immediate network instability and allows time for a strategic response."
+        },
+        {
+            "name": "absorb_traffic",
+            "priority": 2,
+            "description": "Absorbing and redirecting malicious traffic through anycast blackholing helps to mitigate the attack by preventing the malicious traffic from reaching its target. This keeps the network stable and buys time for implementing longer-term solutions."
+        },
+        {
+            "name": "monlist_disable",
+            "priority": 3,
+            "description": "Disabling the 'monlist' command, which is known to be exploited in NTP-based DoS attacks, directly addresses a specific vulnerability. This reduces the attack surface and prevents attackers from exploiting this particular feature."
+        },
+        {
+            "name": "server_handover",
+            "priority": 4,
+            "description": "Handover to a backup server or a more secure server setup can ensure continuity of service while the primary server is being secured and analyzed. This provides a resilient operational backup and minimizes downtime for critical services."
+        },
+        {
+            "name": "firewall_spoofing_detection",
+            "priority": 5,
+            "description": "Implementing firewall rules to detect and block spoofed traffic can significantly reduce the volume of attack traffic, thereby protecting the network from further DoS attempts. This is a crucial step in mitigating ongoing threats and enhancing network security."
+        },
+        {
+            "name": "upgrade_software",
+            "priority": 6,
+            "description": "Upgrading NTP to a version higher than 4.7.2 ensures that the system is not vulnerable to known exploits that have been patched in later versions. This long-term measure enhances overall security and prevents similar attacks in the future."
+        },
+        {
+            "name": "investigations_report",
+            "priority": 7,
+            "description": "Conducting thorough investigations and reporting on the attack is essential for understanding the attack's nature, origin, and impact. This information is vital for preventing future incidents, improving defenses, and potentially taking legal or corrective actions against the attackers."
+        }
+    ]
+}

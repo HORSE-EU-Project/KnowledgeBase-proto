@@ -1,0 +1,7 @@
+{
+    "attack_list": [
+        "pfcf_dos",
+        "dns_reflection_amplification",
+        "ntp_dos"
+    ]
+}
