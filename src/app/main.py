@@ -12,10 +12,6 @@ import logging
 import os
 from dotenv import load_dotenv
 
-class Playbook(BaseModel):
-    mitigation : str
-    url : networks.Url
-
 class Timeframe(TypedDict):
     start: datetime
     end: datetime
@@ -29,9 +25,23 @@ class MitigationPriority(BaseModel):
     priority : int
     description : str
 
+class MitigationFields(BaseModel):
+    name : str
+    value : str
+
+class MitigationComplete(BaseModel):
+    name : str
+    priority : int
+    fields : Optional[List[MitigationFields]] = None
+    description : str
+
 class Attack(BaseModel):
     attack_name : str
     mitigations : Optional[List[MitigationPriority]] = None
+
+class AttackComplete(BaseModel):
+    attack_name : str
+    mitigations : Optional[List[MitigationComplete]] = None
 
 class AttackList(BaseModel):
     attack_list : List[str]
@@ -76,7 +86,7 @@ def get_all_attacks() -> List[str]:
         conn.close()
 
 
-def get_mitigation(attack: str) -> List[str]:
+def get_mitigation_restricted(attack: str) -> List[str]:
     """
     Retrieves mitigation measures associated with a specific attack from the database.
 
@@ -106,6 +116,9 @@ def get_mitigation(attack: str) -> List[str]:
         # commit the transaction
         conn.commit()
 
+        logger = logging.getLogger("mycoolapp")
+        logger.error(f"LOG: {mitigations} ")
+
         # extract results
         mitigations_list = []
         
@@ -125,40 +138,59 @@ def get_mitigation(attack: str) -> List[str]:
         conn.close()
 
 
-def get_playbook(mitigation: str) -> str:
+def get_mitigation(attack: str) -> List[str]:
     """
-    Retrieves the playbook endpoint associated with a specific mitigation measure from the database.
+    Retrieves mitigation measures associated with a specific attack from the database.
 
     Parameters:
-        mitigation (str): The name of the mitigation measure for which to retrieve the playbook endpoint.
+        attack (str): The name of the attack for which to retrieve mitigation measures.
 
     Returns:
-        str: The playbook endpoint associated with the specified mitigation measure.
+        List[MitigationPriority]: A list of mitigation measures with their priorities and description associated with the specified attack.
 
     Raises:
         sqlalchemy.exc.OperationalError: If there is an operational error while connecting to the database.
-        fastapi.HTTPException: If there is no playbook endpoint associated with the specified mitigation measure.
+        fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
     """
     # create connection with database
     engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_SECRET}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}')
 
     conn = engine.connect()
-
+    
     try:
         # execute query
-        query = text(f"SELECT playbook_endpoint FROM mitigation WHERE name = '{mitigation}';")
-        playbook = conn.execute(query).fetchall()
+        query = text(f"SELECT mitigation, mitigation_priority, array_agg(field_name) as field_names, array_agg(field_value) AS field_values, description FROM attacks_mitigations AS am INNER JOIN mitigation AS m ON am.mitigation = m.name WHERE attack = '{attack}' GROUP BY mitigation, mitigation_priority, description ORDER BY mitigation_priority;")   # check security issues
+
+        mitigations = conn.execute(query)
+        mitigations = mitigations.fetchall()
+        if not mitigations:
+            raise HTTPException(status_code=404, detail=f"There exists no mitigation associated to attack '{attack}'")
 
         # commit the transaction
         conn.commit()
 
-        # check if there are no results
-        if not playbook:
-            raise HTTPException(status_code=404, detail=f"There exists no playbook endpoint associated to mitigation '{mitigation}'")
+        # extract results
+        mitigations_list = []
+        
+        for mitigation in mitigations:
+            if all(item is None for item in mitigation[2]) and all(item is None for item in mitigation[3]):
+                mitigation_fields = None  
+            else:  
+                mitigation_fields = [
+                    MitigationFields(name=name if name is not None else "", value=value if value is not None else "")
+                    for name, value in zip(mitigation[2], mitigation[3])
+                ]
 
-        # extract playbook endpoint
-        playbook_endpoint = playbook[0][0]
-        return playbook_endpoint
+            # Only include 'fields' if it's not None
+            if mitigation_fields is None:
+                mitigation_priority = MitigationComplete(name=mitigation[0], priority=mitigation[1], description=mitigation[4])
+            else:
+                mitigation_priority = MitigationComplete(name=mitigation[0], priority=mitigation[1], fields=mitigation_fields, description=mitigation[4])
+
+            mitigations_list.append(mitigation_priority.dict(exclude_none=True))
+        
+        results = mitigations_list
+        return results
 
     except OperationalError as e:
         # If there's an operational error, raise it
@@ -170,8 +202,28 @@ def get_playbook(mitigation: str) -> str:
 
 app = FastAPI()
 
+@app.post("/mitigations_restricted")
+def fetch_mitigation_restricted(attack: Attack) -> Attack:
+    """
+    Fetches mitigation measures for a given attack (restricted version).
+
+    Parameters:
+        attack (Attack): An object containing information about the attack.
+
+    Returns:
+        Attack: The response contains the same Attack object with the mitigation attribute populated.
+
+    Raises:
+        sqlalchemy.exc.OperationalError: If there is an operational error while connecting to the database.
+        fastapi.HTTPException: If there are no mitigation measures associated with the specified attack.
+    """
+    attack.mitigations = get_mitigation_restricted(attack.attack_name)
+    response = attack
+    return response
+
+
 @app.post("/mitigations")
-def fetch_mitigation(attack: Attack) -> Attack:
+def fetch_mitigation(attack: AttackComplete) -> AttackComplete:
     """
     Fetches mitigation measures for a given attack.
 
@@ -188,29 +240,6 @@ def fetch_mitigation(attack: Attack) -> Attack:
     attack.mitigations = get_mitigation(attack.attack_name)
     response = attack
     return response
-
-@app.post("/playbooks")
-def fetch_playbook(mitigation: Mitigation) -> Playbook:
-    """
-    Fetches the playbook URL associated with a mitigation measure.
-
-    Parameters:
-        mitigation (Mitigation): An object containing the name of the mitigation measure.
-
-    Returns:
-        Playbook: A Playbook object containing the mitigation name and playbook URL.
-
-    Raises:
-        HTTPException: If there is no playbook endpoint associated with the specified mitigation measure.
-    """
-    try:
-        playbook_url = get_playbook(mitigation.mitigation_name)
-        response = Playbook(mitigation=mitigation.mitigation_name, url=playbook_url)
-        return response
-
-    except HTTPException as e:
-        # If there's an HTTPException, re-raise it
-        raise e
 
 @app.get("/allattacks")
 def get_all_attacks() -> AttackList:

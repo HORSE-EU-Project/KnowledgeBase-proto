@@ -162,3 +162,4 @@ cython_debug/
 # files
 src/db/
 app/__pycache__
+src/old

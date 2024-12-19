@@ -1,0 +1,46 @@
+{
+    "attack_name": "dns_reflection_amplification",
+    "mitigations": [
+        {
+            "name": "dns_service_disable",
+            "priority": 1,
+            "description": "Temporarily disabling the DNS service immediately halts the attack's impact, preventing further disruption to network services. This drastic measure provides immediate relief, allowing time to implement other mitigation strategies without the attack continuously degrading service quality."
+        },
+        {
+            "name": "anycast_blackhole",
+            "priority": 2,
+            "description": "Utilizing anycast blackholing to absorb and redirect malicious traffic prevents the harmful traffic from overwhelming the DNS servers. This approach helps maintain network stability and minimizes the impact on legitimate users."
+        },
+        {
+            "name": "dns_rate_limiting",
+            "priority": 3,
+            "fields": [
+                {
+                    "name": "rate",
+                    "value": ""
+                }
+            ],
+            "description": "Implementing rate limiting controls the flow of traffic to the DNS servers, mitigating the attack by preventing excessive requests from overloading the system. This action helps preserve server performance and maintains service availability for legitimate traffic."
+        },
+        {
+            "name": "dns_service_handover",
+            "priority": 4,
+            "description": "Handover to a backup or more secure DNS server ensures continuity of service while the primary server is secured and analyzed. This action provides operational resilience and minimizes downtime for critical services, ensuring that DNS resolution remains functional."
+        },
+        {
+            "name": "dns_firewall_spoofing_detection",
+            "priority": 5,
+            "fields": [
+                {
+                    "name": "interface",
+                    "value": ""
+                },
+                {
+                    "name": "destination_host",
+                    "value": ""
+                }
+            ],
+            "description": "Configuring firewalls to detect and block spoofed traffic helps reduce the volume of attack traffic by filtering out illegitimate requests. This defensive measure enhances network security and aids in mitigating ongoing attacks."
+        }
+    ]
+}

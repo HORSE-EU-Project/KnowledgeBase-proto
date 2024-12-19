@@ -39,7 +39,7 @@ def test_all_attacks():
 
 def test_fetch_mitigations():
 
-    endpoint = "/mitigations"
+    endpoint = "/mitigations_restricted"
     json = {
         "attack_name": "pfcf_dos"
         }
@@ -60,7 +60,7 @@ def test_fetch_mitigations():
     assert all(key in response.json()["mitigations"][0] for key in ["name", "priority", "description"])
 
 def test_fetch_mitigations_unknown_attack():
-    endpoint = "/mitigations"
+    endpoint = "/mitigations_restricted"
     json = {
         "attack_name" : "unknown_attack_name"
     }
@@ -72,7 +72,7 @@ def test_fetch_mitigations_unknown_attack():
     assert response.status_code == 404
 
 def test_fetch_mitigations_wrong_json():
-    endpoint = "/mitigations"
+    endpoint = "/mitigations_restricted"
     json = {
         "no_attack_name" : "pfcf_dos"
     }
