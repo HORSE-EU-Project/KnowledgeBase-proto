@@ -11,7 +11,7 @@ COPY ./requirements.txt /docker-compose/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /docker-compose/requirements.txt
 
 # 
-COPY ./app /docker-compose/app
+COPY ./app /docker-compose/src/app
 
 # 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "80"]

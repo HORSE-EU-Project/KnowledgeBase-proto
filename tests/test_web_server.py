@@ -5,7 +5,8 @@ from fastapi import HTTPException
 
 sys.path.insert(0, dirname(abspath(__file__)))
 
-from src.app.main import hello_world, get_all_attacks, get_mitigation_restricted
+from src.app.database import get_mitigation_restricted
+from src.app.routes import hello_world, fetch_all_attacks
 
 # variables
 N_ATTACKS_IN_DB = 3
@@ -16,13 +17,13 @@ def test_hello_world():
 def test_get_all_attacks():
 
     # Assert that the function returns any response
-    assert get_all_attacks() is not None
+    assert fetch_all_attacks() is not None
 
     # Assert that the response has the n. of attacks expected from the db
-    assert len(get_all_attacks().attack_list) == N_ATTACKS_IN_DB
+    assert len(fetch_all_attacks().attack_list) == N_ATTACKS_IN_DB
 
     # Assert that ntp_dos is one of the attacks in the db
-    assert 'ntp_dos' in get_all_attacks().attack_list
+    assert 'ntp_dos' in fetch_all_attacks().attack_list
 
 def test_get_mitigation():
 
