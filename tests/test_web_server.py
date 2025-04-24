@@ -9,7 +9,7 @@ from src.app.database import get_mitigation_restricted
 from src.app.routes import hello_world, fetch_all_attacks
 
 # variables
-N_ATTACKS_IN_DB = 3
+N_ATTACKS_IN_DB = 14
 
 def test_hello_world():
     assert hello_world() == "hello world"

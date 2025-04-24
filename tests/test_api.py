@@ -4,7 +4,7 @@ from src.app.main import app
 client = TestClient(app)
 
 # variables
-N_ATTACKS = 3       
+N_ATTACKS = 14      
 
 def test_hello_world():
 
@@ -57,7 +57,7 @@ def test_fetch_mitigations():
     assert len(response.json()["mitigations"]) > 1
 
     # Assert that the first element of mitigations list is an object containing the fields 'name', 'priority', 'description'
-    assert all(key in response.json()["mitigations"][0] for key in ["name", "priority", "description"])
+    assert all(key in response.json()["mitigations"][0] for key in ["name", "priority", "fields", "description"])
 
 def test_fetch_mitigations_unknown_attack():
     endpoint = "/mitigations_restricted"
